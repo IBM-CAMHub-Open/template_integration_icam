@@ -74,7 +74,7 @@ case $i in
     shift # past argument with no value
     ;;
     *)
-          # unknown option
+    # unknown option
     ;;
 esac
 done
