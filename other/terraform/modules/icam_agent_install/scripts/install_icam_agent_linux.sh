@@ -132,9 +132,10 @@ fi
 
 if [[ $PLATFORM == *"ubuntu"* ]]; then
   PACKAGE_MANAGER=apt-get
-  if { sudo -n apt-get -qqy update 2>&1 || echo E: update failed; } | grep -q '^[W]:'; then
-    echo "[ERROR] There was an error obtaining the latest packages"
-  fi
+  until sudo apt-get update; do
+    echo "Sleeping 2 sec while waiting for apt-get update to finish ..."
+    sleep 2
+  done
 else
   PACKAGE_MANAGER=yum
   if { sudo -n yum -y update 2>&1 || echo E: update failed; } | grep -q '^[W]:'; then
@@ -147,9 +148,11 @@ PACKAGES="bc"
 for PACKAGE in $PACKAGES
 do
   echo "Installing $PACKAGE"
-  sudo $PACKAGE_MANAGER install -y $PACKAGE
+  until sudo $PACKAGE_MANAGER install -y $PACKAGE; do
+    echo "Sleeping 2 sec while waiting for $PACKAGE_MANAGER install to finish ..."
+    sleep 2
+  done   
 done
-
 
 # Install Agent
 export IGNORE_PRECHECK_WARNING=1
