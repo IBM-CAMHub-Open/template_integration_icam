@@ -101,8 +101,8 @@ cd $SOURCE_SUBDIR
 cp APM_MGMT_silent_install.txt APM_MGMT_silent_install.txt.tmp
 
 echo "" >> APM_MGMT_silent_install.txt.tmp
-echo "AGENT_HOME=$INSTALL_DIR" >> APM_MGMT_silent_install.txt.tmp
 echo "License_Agreement=\"I agree to use the software only in accordance with the installed license.\"" >> APM_MGMT_silent_install.txt.tmp
+echo "AGENT_HOME=$INSTALL_DIR" >> APM_MGMT_silent_install.txt.tmp
 echo "INSTALL_AGENT=$AGENT_NAME" >> APM_MGMT_silent_install.txt.tmp
 
 
