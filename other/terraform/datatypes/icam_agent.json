@@ -1,8 +1,20 @@
 {
-    "name": "ibm_cloud_app_management_agent",
-    "label": "ibm_cloud_app_management_agent",
+    "name": "icam_agent",
+    "label": "IBM Cloud App Management Agent",
     "description": "Data structure describing the IBM Cloud App Management agent to be deployed on a host",
     "attributes": [
+        {
+            "name": "icam_config_location",
+            "type": "string",
+            "description": "Source for the IBM Cloud App Management Agent configuration bundle, eg http://IP_ADDRESS:8888/ibm-cloud-app-datacenter-agents-configpack.tar",
+            "label": "Configuration bundle source location",
+            "required": "false",
+            "secured": "false",
+            "immutable": "false",
+            "hidden": "false",
+            "default": "",
+            "options": null
+        },
         {
             "name": "icam_agent_location",
             "type": "string",
@@ -16,10 +28,10 @@
             "options": null
         },
         {
-            "name": "icam_agent_location_credentials",
+            "name": "icam_source_credentials",
             "type": "password",
-            "description": "redentials required to retrieve the IBM Cloud App Management agent, provided in a user:password format",
-            "label": "Agent source location credentials",
+            "description": "Credentials required to retrieve the IBM Cloud App Management agent and optional configuration bundle, provided in a user:password format",
+            "label": "Source location credentials",
             "required": "false",
             "secured": "true",
             "immutable": "false",

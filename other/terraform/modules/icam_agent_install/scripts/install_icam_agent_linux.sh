@@ -39,13 +39,94 @@ GetAgentProductCode() {
     return 0
 }
 
+ConfigureAgentBinaries() {
+    echo "Downloading agent configuration bundle..."
+    apmWorkDir="${TEMP_DIR}/apm"
+    configuredDir="${apmWorkDir}/configuredAgents"
+    unconfiguredDir="${apmWorkDir}/unconfiguredAgents"
+    if [ -f "${TEMP_DIR}/${INSTALLER}" ]; then
+        # Move installer to unconfigured directory
+        mkdir -p ${configuredDir}
+        mkdir -p ${unconfiguredDir}
+        mv ${TEMP_DIR}/${INSTALLER} ${unconfiguredDir}
+
+        # Download and extract configure bundle
+        mkdir -p ${apmWorkDir}/configBundle
+        cd ${apmWorkDir}/configBundle
+        if [[ -z "${SOURCE_CREDENTIALS}" ]]; then
+            curl -O ${CONFIG_BUNDLE}
+        else
+            curl -u ${SOURCE_CREDENTIALS} -O ${CONFIG_BUNDLE}
+        fi
+        bundle=${CONFIG_BUNDLE##*/}
+        tar xvf ${bundle}
+        if [ -f linux_unix_configpack.tar ]; then
+            echo "Configuring agent binaries for ICAM server..."
+            tar xvf linux_unix_configpack.tar
+            sh ./pre_config.sh -s ${unconfiguredDir} -d ${configuredDir} -e env.properties
+        else
+            echo "Configuration bundle does not exist; Exiting"
+            exit 1
+        fi
+
+        # Cleanup
+        mv ${configuredDir}/${INSTALLER} ${TEMP_DIR}
+        rm -rf ${apmWorkDir}
+    fi
+}
+
+InstallAgent() {
+    agentName=$1
+    silentTxt=APP_MGMT_silent_install.txt.tmp
+
+    echo "Preparing silent install file for ${agentName} agent..."
+    cd ${TEMP_DIR}/${SOURCE_SUBDIR}
+    cp APP_MGMT_silent_install.txt ${silentTxt}
+
+    echo "" >> ${silentTxt}
+    echo "License_Agreement=\"I agree to use the software only in accordance with the installed license.\"" >> ${silentTxt}
+    echo "AGENT_HOME=$INSTALL_DIR" >> ${silentTxt}
+    echo "INSTALL_AGENT=${agentName}" >> ${silentTxt}
+
+    echo "Installing ${agentName} agent..."
+    export IGNORE_PRECHECK_WARNING=1
+    ./installAPMAgents.sh -p ${silentTxt}
+
+    echo "Verifying installation of ${agentName} agent..."
+    agentCode=$(GetAgentProductCode ${agentName})
+    agentInstalled=`$INSTALL_DIR/bin/cinfo -d | grep \"${agentCode}\"  | wc -l` 
+    if [ "${agentInstalled}" = "0" ]; then
+        echo "Unable to install ${agentName} agent; exiting."
+        exit 1
+    fi
+    echo "Agent '${agentName}' successfully installed."
+}
+
+GenerateServerUrl() {
+    # Build the URL of the ICAM server from the configured agent binaries
+    icamUrl=""
+    envFile="${TEMP_DIR}/${SOURCE_SUBDIR}/.apm_config/agent_global.environment"
+    if [ -f "${envFile}" ]; then
+        asfRequest=$(grep IRA_ASF_SERVER_URL ${envFile} | cut -f2 -d'=')
+        urlNoPort=$(echo ${asfRequest} | cut -f1-2 -d':')
+        portNumber=$(echo ${asfRequest} | awk -F':' '{print $NF}' | cut -f1 -d'/')
+        tenantId=$(grep IRA_API_TENANT_ID ${envFile} | cut -f2 -d'=')
+        icamUrl="${urlNoPort}:${portNumber}/cemui/landing?subscriptionId=${tenantId}"
+    fi
+
+    if [ ! -z "${icamUrl}" ]; then
+        printf "\n\n\n"
+        echo "ICAM_SERVER_URL ${icamUrl}"
+    fi
+}
+
 
 TEMP_DIR=/tmp
 
 # Check Parameters
 
 if [ "$#" -lt 4 ]; then
-    echo "Usage: $0 icam_agent_location icam_agent_location_credentials icam_agent_source_subdir icam_agent_installation_dir icam_agent_name" >&2
+    echo "Usage: $0 icam_config_location icam_agent_location icam_source_credentials icam_agent_source_subdir icam_agent_installation_dir icam_agent_name" >&2
     exit 1
 fi
 
@@ -53,11 +134,15 @@ fi
 for i in "$@"
 do
 case $i in
+    --icam_config_location=*)
+    CONFIG_BUNDLE="${i#*=}"
+    shift # past argument=value
+    ;;
     --icam_agent_location=*)
     SOURCE="${i#*=}"
     shift # past argument=value
     ;;
-    --icam_agent_location_credentials=*)
+    --icam_source_credentials=*)
     SOURCE_CREDENTIALS="${i#*=}"
     shift # past argument=value
     ;;
@@ -79,13 +164,11 @@ case $i in
 esac
 done
 
-
 INSTALLER=${SOURCE##*/}
 
 AGENTS="$@"
 
 # Download APM Installer
-
 cd $TEMP_DIR
 if [[ -z "$SOURCE_CREDENTIALS" ]]; then
     curl -O $SOURCE
@@ -93,17 +176,16 @@ else
     curl -u$SOURCE_CREDENTIALS -O $SOURCE
 fi
 
+if [ ! -z "${CONFIG_BUNDLE}" ]; then
+    # Configure bundle specified; Agent source binary presumed to be unconfigued
+    ConfigureAgentBinaries
+
+    # Return to original work directory
+    cd ${TEMP_DIR}
+fi
+
+# Extract configured agent installer bundle
 tar xvf $INSTALLER
-
-# Modify Silent Install File
-
-cd $SOURCE_SUBDIR
-cp APM_MGMT_silent_install.txt APM_MGMT_silent_install.txt.tmp
-
-echo "" >> APM_MGMT_silent_install.txt.tmp
-echo "License_Agreement=\"I agree to use the software only in accordance with the installed license.\"" >> APM_MGMT_silent_install.txt.tmp
-echo "AGENT_HOME=$INSTALL_DIR" >> APM_MGMT_silent_install.txt.tmp
-echo "INSTALL_AGENT=$AGENT_NAME" >> APM_MGMT_silent_install.txt.tmp
 
 
 # Install Pre-requisites
@@ -144,7 +226,6 @@ else
 fi
 
 PACKAGES="bc"
-
 for PACKAGE in $PACKAGES
 do
   echo "Installing $PACKAGE"
@@ -154,18 +235,19 @@ do
   done   
 done
 
-# Install Agent
-export IGNORE_PRECHECK_WARNING=1
-./installAPMAgents.sh -p  APM_MGMT_silent_install.txt.tmp
 
-#Check for successful installation
-AGENT_CODE=$(GetAgentProductCode ${AGENT_NAME})
-AGENT_INSTALLED=`$INSTALL_DIR/bin/cinfo -d | grep \"${AGENT_CODE}\"  | wc -l` 
-if [ "$AGENT_INSTALLED" = "0" ]; then
-  exit 1
-fi
+# Install Agent(s)
+agentNames=$(echo $AGENT_NAME | tr '[,:;]' ' ')
+for agentName in ${agentNames}
+do
+    InstallAgent ${agentName}
+done
+
+
+# Generate ICAM server URL from agent configuration details
+GenerateServerUrl
+
 
 # Cleanup
 rm $TEMP_DIR/$INSTALLER
 rm -Rf $TEMP_DIR/$SOURCE_SUBDIR
-

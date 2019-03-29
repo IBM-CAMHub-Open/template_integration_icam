@@ -12,7 +12,7 @@
 
 
 resource "camc_scriptpackage" "InstallScript" {
-  program = ["/bin/bash", "/tmp/install_icam_agent_linux.sh", "--icam_agent_location=${var.icam_agent_location}", "--icam_agent_location_credentials=${var.icam_agent_location_credentials}", "--icam_agent_source_subdir=${var.icam_agent_source_subdir}", "--icam_agent_installation_dir=${var.icam_agent_installation_dir}", "--icam_agent_name=${var.icam_agent_name}", "> /tmp/install_icam_agent_linux.log"]
+  program = ["/bin/bash", "/tmp/install_icam_agent_linux.sh", "--icam_config_location=${var.icam_config_location}", "--icam_agent_location=${var.icam_agent_location}", "--icam_source_credentials=${var.icam_source_credentials}", "--icam_agent_source_subdir=${var.icam_agent_source_subdir}", "--icam_agent_installation_dir=${var.icam_agent_installation_dir}", "--icam_agent_name=${var.icam_agent_name}", "> /tmp/install_icam_agent_linux.log"]
   remote_host = "${var.ip_address}"
   remote_user = "${var.user}"
   remote_password = "${var.password}"
@@ -27,8 +27,10 @@ resource "camc_scriptpackage" "InstallScript" {
   on_create = true
 }
 
-resource "camc_scriptpackage" "DestroyScript" {
-  program = ["/bin/bash", "${var.icam_agent_installation_dir}/bin/smai-agent.sh uninstall_all force", "> /tmp/unistall_icam_agent_linux.log"]
+resource "camc_scriptpackage" "FetchServerUrl" {
+  depends_on = ["camc_scriptpackage.InstallScript"]
+  
+  program = ["tail -50 /tmp/install_icam_agent_linux.log", "| grep ICAM_SERVER_URL", "| cut -f2 -d' '"]
   remote_host = "${var.ip_address}"
   remote_user = "${var.user}"
   remote_password = "${var.password}"
@@ -38,5 +40,21 @@ resource "camc_scriptpackage" "DestroyScript" {
   bastion_password = "${var.bastion_password}"
   bastion_private_key = "${var.bastion_private_key}"  
   bastion_port = "${var.bastion_port}"    
+  on_create = true
+}
+
+resource "camc_scriptpackage" "DestroyScript" {
+  program = ["/bin/bash", "/tmp/uninstall_icam_agent_linux.sh", "--icam_config_location=${var.icam_config_location}", "--icam_agent_location=${var.icam_agent_location}", "--icam_source_credentials=${var.icam_source_credentials}", "--icam_agent_source_subdir=${var.icam_agent_source_subdir}", "--icam_agent_installation_dir=${var.icam_agent_installation_dir}", "--icam_agent_name=${var.icam_agent_name}", "> /tmp/uninstall_icam_agent_linux.log"]
+  remote_host = "${var.ip_address}"
+  remote_user = "${var.user}"
+  remote_password = "${var.password}"
+  remote_key = "${var.private_key}"
+  bastion_host = "${var.bastion_host}"
+  bastion_user = "${var.bastion_user}"
+  bastion_password = "${var.bastion_password}"
+  bastion_private_key = "${var.bastion_private_key}"  
+  bastion_port = "${var.bastion_port}"    
+  destination = "/tmp/uninstall_icam_agent_linux.sh"
+  source = "${path.module}/scripts/uninstall_icam_agent_linux.sh"
   on_delete = true
 }

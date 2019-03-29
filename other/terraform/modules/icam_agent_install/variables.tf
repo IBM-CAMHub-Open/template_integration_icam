@@ -19,9 +19,10 @@ variable "private_key" { type = "string" description = "Private key of the insta
 # COMMAND VARIABLES
 ##############################################################
 
-variable "icam_agent_location" { description = "Source for the IBM Cloud App Management Agent installer, eg http://IP_ADDRESS:8888/APP_MGMT_Agent_Install_2018.2.0" }
-variable "icam_agent_location_credentials" { description = "Credentials required to retrieve the IBM Cloud App Management agent, provided in a user:password format." }
-variable "icam_agent_source_subdir" { description = "Subdirectory within the installer where the installation files reside, eg APP_MGMT_Agent_Install_2018.2.0" }
+variable "icam_config_location" { description = "Source for the IBM Cloud App Management Agent configuration bundle, eg http://IP_ADDRESS:8888/ibm-cloud-app-datacenter-agents-configpack.tar" }
+variable "icam_agent_location" { description = "Source for the IBM Cloud App Management Agent installer, eg http://IP_ADDRESS:8888/APP_MGMT_Agent_Install_2018.4.1.tar.gz" }
+variable "icam_source_credentials" { description = "Credentials required to retrieve the IBM Cloud App Management agent and optional configuration bundle, provided in a user:password format." }
+variable "icam_agent_source_subdir" { description = "Subdirectory within the installer where the installation files reside, eg APP_MGMT_Agent_Install_2018.4.1" }
 variable "icam_agent_installation_dir" { description = "IBM Cloud App Management installation directory" default = "/opt/ibm/apm/agent" }
 variable "icam_agent_name" { type = "string" description = "IBM Cloud App Management agent to be installed. For example, os." }
 

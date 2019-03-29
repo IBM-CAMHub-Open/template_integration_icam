@@ -25,7 +25,7 @@ Script Remote, executes on the remote host.
 ## Prerequisites
 
 - An installed IBM Cloud App Management Server, the location details should be pre-filled in the agent .tar file.
-- The IBM Cloud App Management Agent tar file (configured_app_mgmt_agents_xlinux_2018.2.0.tar file or equivalent), stored on a URL reachable location, for example artifactory or a HTTP Server. 
+- The IBM Cloud App Management Agent tar file (configured_app_mgmt_agents_xlinux_2018.4.1.tar file or equivalent), stored on a URL reachable location, for example artifactory or a HTTP Server. 
 - The target server must be able to reach the IBM Cloud App Management Server.
 - The target server must have greater than **4GB availible** in /tmp.
 - The target server must have remote logins enabled.
@@ -55,13 +55,24 @@ Script Remote, executes on the remote host.
   </tr>
 
   <tr>
-    <td>icam_agent_location</td>
-    <td>Source for the IBM Cloud App Management Agent installer, eg http://IP_ADDRESS:8888/APP_MGMT_Agent_Install_2018.2.0</td>
+    <td>icam_config_location</td>
+    <td>
+        Source for the IBM Cloud App Management Agent configuration bundle, eg http://IP_ADDRESS:8888/ibm-cloud-app-datacenter-agents-configpack.tar.
+        Bundle is used to configure the agent to interact with a particular ICAM server.
+    </td>
   </tr>
   
   <tr>
-    <td>icam_agent_location_credentials</td>
-    <td>IBM Cloud App Management agent location credentials. Credentials need to be provided in a format copatible with `curl -u` syntax, i.e. username:password. Credentials are not required if the agent binary is retreieved from an unsecured location, e.g HTTP server</td>
+    <td>icam_agent_location</td>
+    <td>
+        Source for the IBM Cloud App Management Agent installer, eg http://IP_ADDRESS:8888/APP_MGMT_Agent_Install_2018.4.1.
+        If location of configuration bundle is not provided, this agent installer must be pre-configured for a particular ICAM server.
+    </td>
+  </tr>
+  
+  <tr>
+    <td>icam_source_credentials</td>
+    <td>IBM Cloud App Management source location credentials. Credentials need to be provided in a format copatible with `curl -u` syntax, i.e. username:password. Credentials are not required if the agent installer and optional configuration bundle is retrieved from an unsecured location, e.g HTTP server</td>
   </tr>
 
   <tr>

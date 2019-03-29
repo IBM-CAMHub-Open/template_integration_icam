@@ -1,7 +1,7 @@
 {
   "input_datatypes": [
     {
-      "name": "ibm_cloud_app_management_agent",
+      "name": "icam_agent",
       "label": "IBM Cloud App Management Agent"
     },
     {
@@ -112,42 +112,51 @@
       "label": "Private key",
       "secured": true,
       "required": false,
-      "immutable": false,
-      "group_name": "icam_agent_linux"
+      "immutable": false
+    },
+    {
+      "name": "icam_config_location",
+      "type": "string",
+      "description": "Source for the IBM Cloud App Management Agent configuration bundle, eg http://IP_ADDRESS:8888/ibm-cloud-app-datacenter-agents-configpack.tar",
+      "hidden": true,
+      "default": "${icam_agent.icam_config_location}",
+      "label": "Configuration bundle source location",
+      "secured": false,
+      "required": true,
+      "immutable": false
     },
     {
       "name": "icam_agent_location",
       "type": "string",
-      "description": "Source for the IBM Cloud App Management Agent installer, eg http://IP_ADDRESS:8888/APP_MGMT_Agent_Install_2018.2.0",
+      "description": "Source for the IBM Cloud App Management Agent installer, eg http://IP_ADDRESS:8888/APP_MGMT_Agent_Install_2018.4.1.tar.gz",
       "hidden": true,
-      "default": "${ibm_cloud_app_management_agent.icam_agent_location}",
+      "default": "${icam_agent.icam_agent_location}",
       "label": "Agent source location",
       "secured": false,
       "required": true,
-      "immutable": false,
-      "group_name": "icam_agent_linux"
+      "immutable": false
     },
     {
-      "name": "icam_agent_location_credentials",
+      "name": "icam_source_credentials",
       "type": "string",
-      "description": "Credentials required to retrieve the IBM Cloud App Management agent, provided in a user:password format",
+      "description": "Credentials required to retrieve the IBM Cloud App Management agent and optional configuration bundle, provided in a user:password format",
       "hidden": true,
-      "label": "Agent source credentials",
+      "label": "Source location credentials",
       "secured": false,
       "required": true,
       "immutable": false,
-      "default": "${ibm_cloud_app_management_agent.icam_agent_location_credentials}"
+      "default": "${icam_agent.icam_source_credentials}"
     },
     {
       "name": "icam_agent_source_subdir",
       "type": "string",
-      "description": "Subdirectory within the installer where the installation files reside, eg APP_MGMT_Agent_Install_2018.2.0",
+      "description": "Subdirectory within the installer where the installation files reside, eg APP_MGMT_Agent_Install_2018.4.1",
       "hidden": true,
       "label": "Agent subdirectory",
       "secured": false,
       "required": true,
       "immutable": false,
-      "default": "${ibm_cloud_app_management_agent.icam_agent_source_subdir}"
+      "default": "${icam_agent.icam_agent_source_subdir}"
     },
     {
       "name": "icam_agent_installation_dir",
@@ -158,7 +167,7 @@
       "secured": false,
       "required": true,
       "immutable": false,
-      "default": "${ibm_cloud_app_management_agent.icam_agent_installation_dir}"
+      "default": "${icam_agent.icam_agent_installation_dir}"
     },
     {
       "name": "icam_agent_name",
@@ -169,7 +178,7 @@
       "secured": false,
       "required": true,
       "immutable": false,
-      "default": "${ibm_cloud_app_management_agent.icam_agent_name}"
+      "default": "${icam_agent.icam_agent_name}"
     }
   ]
 }
