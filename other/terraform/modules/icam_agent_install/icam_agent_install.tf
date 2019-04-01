@@ -27,10 +27,10 @@ resource "camc_scriptpackage" "InstallScript" {
   on_create = true
 }
 
-resource "camc_scriptpackage" "FetchServerUrl" {
+resource "camc_scriptpackage" "FetchServerInfo" {
   depends_on = ["camc_scriptpackage.InstallScript"]
   
-  program = ["tail -50 /tmp/install_icam_agent_linux.log", "| grep ICAM_SERVER_URL", "| cut -f2 -d' '"]
+  program = ["tail -50 /tmp/install_icam_agent_linux.log", "| grep ICAM_SERVER_INFO", "| cut -f2 -d'='"]
   remote_host = "${var.ip_address}"
   remote_user = "${var.user}"
   remote_password = "${var.password}"

@@ -102,21 +102,23 @@ InstallAgent() {
     echo "Agent '${agentName}' successfully installed."
 }
 
-GenerateServerUrl() {
-    # Build the URL of the ICAM server from the configured agent binaries
-    icamUrl=""
+GenerateServerInfo() {
+    # Using details from the configured agent binaries, build JSON map of info pertaining to the ICAM server
+    icamServerJson=""
     envFile="${TEMP_DIR}/${SOURCE_SUBDIR}/.apm_config/agent_global.environment"
     if [ -f "${envFile}" ]; then
         asfRequest=$(grep IRA_ASF_SERVER_URL ${envFile} | cut -f2 -d'=')
-        urlNoPort=$(echo ${asfRequest} | cut -f1-2 -d':')
-        portNumber=$(echo ${asfRequest} | awk -F':' '{print $NF}' | cut -f1 -d'/')
+        serverName=$(echo ${asfRequest} | awk -F'//' '{print $NF}' | cut -f1 -d':')
+        serverPort=$(echo ${asfRequest} | awk -F':'  '{print $NF}' | cut -f1 -d'/')
         tenantId=$(grep IRA_API_TENANT_ID ${envFile} | cut -f2 -d'=')
-        icamUrl="${urlNoPort}:${portNumber}/cemui/landing?subscriptionId=${tenantId}"
+        
+        icamServerJson="{ \"server\": \"${serverName}\", \"port\": \"${serverPort}\", \"tenant\": \"${tenantId}\" }"
     fi
 
-    if [ ! -z "${icamUrl}" ]; then
+    if [ ! -z "${icamServerJson}" ]; then
         printf "\n\n\n"
-        echo "ICAM_SERVER_URL ${icamUrl}"
+        echo "ICAM_SERVER_INFO=${icamServerJson}"
+        printf "\n"
     fi
 }
 
@@ -244,8 +246,8 @@ do
 done
 
 
-# Generate ICAM server URL from agent configuration details
-GenerateServerUrl
+# Generate ICAM server info from agent configuration details
+GenerateServerInfo
 
 
 # Cleanup

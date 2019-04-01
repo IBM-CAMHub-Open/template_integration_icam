@@ -180,5 +180,18 @@
       "immutable": false,
       "default": "${icam_agent.icam_agent_name}"
     }
+  ],
+  
+  "template_output_params": [
+    {
+      "name": "icam_server_url",
+      "label": "ICAM Server Resources URL",
+      "description": "ICAM Server Resources URL",
+      "group_name": "",
+      "secured": false,
+      "hidden": false,
+      "shortname": "",
+      "type": "url"
+    }
   ]
 }
