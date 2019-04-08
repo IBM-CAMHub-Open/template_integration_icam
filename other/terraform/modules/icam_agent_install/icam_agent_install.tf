@@ -12,7 +12,7 @@
 
 
 resource "camc_scriptpackage" "InstallScript" {
-  program = ["/bin/bash", "/tmp/install_icam_agent_linux.sh", "--icam_config_location=${var.icam_config_location}", "--icam_agent_location=${var.icam_agent_location}", "--icam_source_credentials=${var.icam_source_credentials}", "--icam_agent_source_subdir=${var.icam_agent_source_subdir}", "--icam_agent_installation_dir=${var.icam_agent_installation_dir}", "--icam_agent_name=${var.icam_agent_name}", "> /tmp/install_icam_agent_linux.log"]
+  program = ["/bin/bash", "/tmp/install_icam_agent_linux.sh", "--icam_config_location=${var.icam_config_location}", "--icam_agent_location=${var.icam_agent_location}", "--icam_source_credentials=${var.icam_source_credentials}", "--icam_agent_source_subdir=${var.icam_agent_source_subdir}", "--icam_agent_installation_dir=${var.icam_agent_installation_dir}", "--icam_agent_name=${var.icam_agent_name}", "2>&1 | tee /tmp/install_icam_agent_linux.log"]
   remote_host = "${var.ip_address}"
   remote_user = "${var.user}"
   remote_password = "${var.password}"
@@ -44,7 +44,7 @@ resource "camc_scriptpackage" "FetchServerInfo" {
 }
 
 resource "camc_scriptpackage" "DestroyScript" {
-  program = ["/bin/bash", "/tmp/uninstall_icam_agent_linux.sh", "--icam_config_location=${var.icam_config_location}", "--icam_agent_location=${var.icam_agent_location}", "--icam_source_credentials=${var.icam_source_credentials}", "--icam_agent_source_subdir=${var.icam_agent_source_subdir}", "--icam_agent_installation_dir=${var.icam_agent_installation_dir}", "--icam_agent_name=${var.icam_agent_name}", "> /tmp/uninstall_icam_agent_linux.log"]
+  program = ["/bin/bash", "/tmp/uninstall_icam_agent_linux.sh", "--icam_config_location=${var.icam_config_location}", "--icam_agent_location=${var.icam_agent_location}", "--icam_source_credentials=${var.icam_source_credentials}", "--icam_agent_source_subdir=${var.icam_agent_source_subdir}", "--icam_agent_installation_dir=${var.icam_agent_installation_dir}", "--icam_agent_name=${var.icam_agent_name}", "2>&1 | tee /tmp/uninstall_icam_agent_linux.log"]
   remote_host = "${var.ip_address}"
   remote_user = "${var.user}"
   remote_password = "${var.password}"

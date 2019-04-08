@@ -150,7 +150,7 @@
     {
       "name": "icam_agent_source_subdir",
       "type": "string",
-      "description": "Subdirectory within the installer where the installation files reside, eg APP_MGMT_Agent_Install_2018.4.1",
+      "description": "Subdirectory within the installer where the installation files reside, eg APP_MGMT_XLINUX_Agent_Install_2018.4.1",
       "hidden": true,
       "label": "Agent subdirectory",
       "secured": false,

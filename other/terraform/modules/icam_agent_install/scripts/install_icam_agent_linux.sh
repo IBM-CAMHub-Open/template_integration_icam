@@ -40,6 +40,7 @@ GetAgentProductCode() {
 }
 
 ConfigureAgentBinaries() {
+    set -e
     echo "Downloading agent configuration bundle..."
     apmWorkDir="${TEMP_DIR}/apm"
     configuredDir="${apmWorkDir}/configuredAgents"
@@ -76,6 +77,7 @@ ConfigureAgentBinaries() {
 }
 
 InstallAgent() {
+    set -e
     agentName=$1
     silentTxt=APP_MGMT_silent_install.txt.tmp
 
