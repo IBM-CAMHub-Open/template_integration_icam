@@ -16,6 +16,7 @@ module "icam_agent_install_linux" {
   bastion_user        = "${var.bastion_user}"
   bastion_private_key = "${var.bastion_private_key}"
   bastion_port        = "${var.bastion_port}"
+  bastion_host_key    = "${var.bastion_host_key}"
   bastion_password    = "${var.bastion_password}"      
   #######
 }

@@ -17,6 +17,10 @@ variable "bastion_port" {
   type = "string"
 }
 
+variable "bastion_host_key" {
+  type = "string"
+}
+
 variable "bastion_password" {
   type = "string"
 }

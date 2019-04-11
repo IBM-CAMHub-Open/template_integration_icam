@@ -15,7 +15,18 @@
 # limitations under the License.
 # =================================================================
 
-UninstallAgent() {
+set -o pipefail
+
+# Log the given message upon failure and exit
+logFailure() {
+    message=$1
+    echo -e "\n\n\n"
+    echo "ERROR: ${message}"
+    echo -e "\n"
+    exit 1
+}
+
+uninstallAgent() {
     agentName=$1
     agentScript=${INSTALL_DIR}/bin/${agentName}-agent.sh
     status=0
@@ -39,18 +50,17 @@ UninstallAgent() {
             echo "Agent script ${agentScript} has not been removed; Agent may not be fully uninstalled"
             status=1
         fi
+
+        if [ ${status} -eq 0 ]; then
+            echo "${agentName} agent has been uninstalled"
+        fi
     else
         echo "Script for ${agentName} agent does not exist; skipping..."
-        status=1
-    fi
-
-    if [ ${status} -eq 0 ]; then
-        echo "${agentName} agent has been uninstalled"
     fi
     return $status
 }
 
-IdentifySeparateAgents() {
+identifySeparateAgents() {
     for scriptName in `cat ${INSTALL_DIR}/config/agentscripts.properties | cut -f2 -d'|' | sort -u`
     do
         agentName=$(echo ${scriptName} | cut -f1 -d'-')
@@ -65,9 +75,33 @@ IdentifySeparateAgents() {
     echo ${separateAgents}
 }
 
+# Perform tasks necessary for installing the agent(s)
+performTasks() {
+    # Uninstall specified agent(s)
+    agentNames=$(echo $AGENT_NAME | tr '[,:;]' ' ')
+    for agentName in ${agentNames}
+    do
+        uninstallAgent ${agentName}
+        if [ $? -ne 0 ]; then
+            logFailure "Unable to fully uninstall agent ${agentName}"
+        fi
+    done
+
+    # Determine if additional agents have been installed separately
+    additionalAgents=$(identifySeparateAgents)
+    if [ -z "${additionalAgents}" ]; then
+        if [ -x "${INSTALL_DIR}/bin/smai-agent.sh" ]; then
+            echo "No additional agents have been installed separately; removing all agent artifacts..."
+            ${INSTALL_DIR}/bin/smai-agent.sh uninstall_all force
+        fi
+    else
+        echo "Additional agent(s) (${additionalAgents}) have been installed separately"
+    fi
+}
+
 
 # Check Parameters
-if [ "$#" -lt 2 ]; then
+if [ "$#" -lt 3 ]; then
     echo "Usage: $0 icam_agent_installation_dir icam_agent_name" >&2
     exit 1
 fi
@@ -75,33 +109,30 @@ fi
 # Assign Parameters
 for i in "$@"
 do
-case $i in
-    --icam_agent_installation_dir=*)
-    INSTALL_DIR="${i#*=}"
-    shift # past argument=value
-    ;;
-    --icam_agent_name=*)
-    AGENT_NAME="${i#*=}"
-    shift # past argument with no value
-    ;;
-    *)
-    # unknown option
-    ;;
-esac
+    case $i in
+        --icam_agent_installation_dir=*)
+        INSTALL_DIR="${i#*=}"
+        shift # past argument=value
+        ;;
+        --icam_agent_name=*)
+        AGENT_NAME="${i#*=}"
+        shift # past argument with no value
+        ;;
+        --log_file=*)
+        LOG_FILE="${i#*=}"
+        shift # past argument with no value
+        ;;
+        *)
+        # unknown option
+        ;;
+    esac
 done
 
-# Uninstall specified agent(s)
-agentNames=$(echo $AGENT_NAME | tr '[,:;]' ' ')
-for agentName in ${agentNames}
-do
-    UninstallAgent ${agentName}
-done
 
-# Determine if additional agents have been installed separately
-additionalAgents=$(IdentifySeparateAgents)
-if [ -z "${additionalAgents}" ]; then
-    echo "No additional agents have been installed separately; removing all agent artifacts..."
-    ${INSTALL_DIR}/bin/smai-agent.sh uninstall_all force
-else
-    echo "Additional agent(s) (${additionalAgents}) have been installed separately"
+# Perform uninstalltion(s)
+performTasks 2>&1 | tee ${LOG_FILE}
+exitStatus=$?
+if [ $exitStatus -ne 0 ]; then
+    echo "Uninstall did not complete successfully; Exit code ${exitStatus}"
 fi
+exit $exitStatus
