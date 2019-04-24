@@ -48,7 +48,7 @@
             "secured": "false",
             "immutable": "false",
             "hidden": "false",
-            "default": "APP_MGMT_Agent_Install_2018.4.1",
+            "default": "",
             "options": null
         },
         {
