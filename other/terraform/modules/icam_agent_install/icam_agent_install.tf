@@ -33,7 +33,7 @@ resource "null_resource" "InstallScript" {
   
   provisioner "remote-exec" {
     inline = [
-      "/bin/bash /tmp/install_icam_agent_linux.sh --icam_config_location=${var.icam_config_location} --icam_agent_location=${var.icam_agent_location} --icam_source_credentials=${var.icam_source_credentials} --icam_agent_source_subdir=${var.icam_agent_source_subdir} --icam_agent_installation_dir=${var.icam_agent_installation_dir} --icam_agent_name=${var.icam_agent_name} --log_file=/tmp/install_icam_agent_linux.log"
+      "/bin/bash /tmp/install_icam_agent_linux.sh --icam_config_location=${var.icam_config_location} --icam_agent_location=${var.icam_agent_location} --icam_source_credentials=${var.icam_source_credentials} --icam_agent_installation_dir=${var.icam_agent_installation_dir} --icam_agent_name=${var.icam_agent_name} --log_file=/tmp/install_icam_agent_linux.log"
     ]
   }
 }
@@ -41,7 +41,7 @@ resource "null_resource" "InstallScript" {
 resource "camc_scriptpackage" "FetchServerInfo" {
   depends_on = ["null_resource.InstallScript"]
   
-  program = ["svrInfo=$(grep ICAM_SERVER_INFO /tmp/install_icam_agent_linux.log | cut -f2 -d'=');", "if [ -z $svrInfo ]; then echo '{}'; else echo $svrInfo; fi"]
+  program = ["svrInfo=$(grep ICAM_SERVER_INFO /tmp/install_icam_agent_linux.log | cut -f2 -d'=');", "if [ -z \"$${svrInfo}\" ]; then echo '{}'; else echo $svrInfo; fi"]
   remote_host = "${var.ip_address}"
   remote_user = "${var.user}"
   remote_password = "${var.password}"

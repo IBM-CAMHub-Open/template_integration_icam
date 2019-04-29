@@ -33,8 +33,14 @@ commandExists() {
 
 # Remove work files
 cleanup() {
-    rm -f  $TEMP_DIR/$INSTALLER
-    rm -rf $TEMP_DIR/$SOURCE_SUBDIR
+    if [ -f "${TEMP_DIR}/${INSTALLER}" ]; then
+        rm -f  ${TEMP_DIR}/${INSTALLER}
+    fi
+    if [ ! -z "${SOURCE_SUBDIR}" ]; then
+        if [ -d "${TEMP_DIR}/${SOURCE_SUBDIR}" ]; then
+            rm -rf ${TEMP_DIR}/${SOURCE_SUBDIR}
+        fi
+    fi
 }
 
 # Download bundle containing the agents and their installer
@@ -114,9 +120,20 @@ configureAgentBinaries() {
     
 # Extract configured agent source bundle
 extractAgentInstaller() {
-    # Extract configured agent installer bundle
-    tar xf $INSTALLER
-    return $?
+    exitStatus=0
+    if [ -f "${TEMP_DIR}/${INSTALLER}" ]; then
+        # Determine root directory within agent source bundle
+        SOURCE_SUBDIR=$(tar -tzf ${TEMP_DIR}/${INSTALLER} | head -1 | cut -f1 -d'/')
+        
+        # Extract configured agent installer bundle
+        cd ${TEMP_DIR}
+        tar xf ${INSTALLER}
+        exitStatus=$?
+    else
+        logFailure "Installer bundle (${TEMP_DIR}/${INSTALLER}) does not exist"
+        exitStatus=$?
+    fi
+    return $exitStatus
 }
 
 # Install prerequisite packages required by agents
@@ -301,8 +318,8 @@ performTasks() {
 
 
 # Check parameters
-if [ "$#" -lt 5 ]; then
-    echo "Usage: $0 [icam_config_location] icam_agent_location icam_source_credentials icam_agent_source_subdir icam_agent_installation_dir icam_agent_name log_file" >&2
+if [ "$#" -lt 4 ]; then
+    echo "Usage: $0 [icam_config_location] icam_agent_location icam_source_credentials icam_agent_installation_dir icam_agent_name log_file" >&2
     exit 1
 fi
 
@@ -320,10 +337,6 @@ do
         ;;
         --icam_source_credentials=*)
         SOURCE_CREDENTIALS="${i#*=}"
-        shift # past argument=value
-        ;;
-        --icam_agent_source_subdir=*)
-        SOURCE_SUBDIR="${i#*=}"
         shift # past argument=value
         ;;
         --icam_agent_installation_dir=*)
@@ -347,6 +360,7 @@ done
 TEMP_DIR=/tmp
 INSTALLER=${SOURCE##*/}
 AGENTS="$@"
+SOURCE_SUBDIR=""
 
 # Perform installation(s)
 performTasks 2>&1 | tee ${LOG_FILE}

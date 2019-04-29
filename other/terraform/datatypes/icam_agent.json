@@ -40,18 +40,6 @@
             "options": null
         },
         {
-            "name": "icam_agent_source_subdir",
-            "type": "string",
-            "description": "Subdirectory within the installer where the installation files reside, eg APP_MGMT_Agent_Install_2018.4.1",
-            "label": "Agent subdirectory",
-            "required": "true",
-            "secured": "false",
-            "immutable": "false",
-            "hidden": "false",
-            "default": "",
-            "options": null
-        },
-        {
             "name": "icam_agent_installation_dir",
             "type": "string",
             "description": "IBM Cloud App Management installation directory",

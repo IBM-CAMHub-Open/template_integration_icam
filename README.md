@@ -76,10 +76,6 @@ Script Remote, executes on the remote host.
   </tr>
 
   <tr>
-    <td>icam_agent_source_subdir</td>
-    <td>Name of the subdir within the tar file that the installer is located in, eg, APMADV_Agent_Install_8.1.4.0.1</td>
-  </tr>
-  <tr>
     <td>icam_agent_installation_dir</td>
     <td>IBM Cloud App Management agent installation directory, default = /opt/ibm/apm/agent.</td>
   </tr>
