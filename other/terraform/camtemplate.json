@@ -23,7 +23,6 @@
       }
     },
     "metadata": {
-      "displayName": "IBM Cloud App Management Agent Installation Template",
       "providerDisplayName": "Other",
       "longDescription": "This template will install IBM Cloud App Management agents on a target node. The Agent Installation package must be loaded in the environment and accessible via a target URI (http/s, artifactory, etc).",
       "bullets": [{
